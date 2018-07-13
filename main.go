@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -34,31 +35,40 @@ func main() {
 	flag.Parse()
 	log.Println("cfddns >start")
 
-	r, err := http.Get(httpBin)
+	err := run()
 	if err != nil {
 		log.Panicln(err)
 	}
+
+	log.Println("cfddns >done")
+}
+
+func run() error {
+	r, err := http.Get(httpBin)
+	if err != nil {
+		return err
+	}
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
 
 	var ipResp = new(ipResponse)
 	err = json.Unmarshal(buf, &ipResp)
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
 	ip := ipResp.Origin
 	log.Println("acquired public IP: ", ip)
 
 	api, err := cloudflare.New(apiKey, apiEmail)
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
 
 	zoneID, err := api.ZoneIDByName(domain)
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
 
 	recordParameter := cloudflare.DNSRecord{
@@ -66,7 +76,7 @@ func main() {
 	}
 	records, err := api.DNSRecords(zoneID, recordParameter)
 	if len(records) != 1 {
-		log.Panicln("got too many records back matching subdomain")
+		return errors.New("got too many records back matching subdomain")
 	}
 
 	record := records[0]
@@ -74,8 +84,8 @@ func main() {
 
 	err = api.UpdateDNSRecord(zoneID, record.ID, record)
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
 
-	log.Println("cfddns >done")
+	return nil
 }
