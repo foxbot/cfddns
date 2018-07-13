@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/cloudflare/cloudflare-go"
 )
@@ -33,6 +34,10 @@ func init() {
 
 func main() {
 	flag.Parse()
+	if flag.NFlag() < 4 {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 	log.Println("cfddns >start")
 
 	err := run()
