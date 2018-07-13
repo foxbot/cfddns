@@ -11,14 +11,18 @@ A dynamic DNS updater for Cloudflare
 
 ### `cfddns -key=<key> -email=<email> -domain=test.dev -subdomain=remote.test.dev`
 
-where:
+#### where:
 
 **key:** Cloudflare API Key
+
 **email:** Cloudflare E-Mail address
+
 **domain:** The root domain (zone) in Cloudflare
+
 **subdomain:** The name for the DNS record in Cloudflare
 
-optionally:
+#### optionally:
+
 **httpbin:** In the format `httpbin=https://httpbin.org/ip`, this should point to your own running instance of httpbin.org's docker package.
 
 Or, a custom API that returns:
